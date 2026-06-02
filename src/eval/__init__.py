@@ -1,0 +1,1 @@
+"""Warstwa ewaluacji: metryki, runner i bramka SLA dla CI."""

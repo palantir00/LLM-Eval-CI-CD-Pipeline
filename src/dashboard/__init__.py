@@ -1,0 +1,1 @@
+"""Dashboard wizualizujący metryki w czasie (Streamlit)."""

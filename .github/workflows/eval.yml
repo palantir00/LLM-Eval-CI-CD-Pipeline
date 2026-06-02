@@ -1,0 +1,26 @@
+# Workflow GitHub Actions — pełna implementacja w KROKU 10.
+#
+# Założenia (do realizacji):
+#   - uruchamia się przy każdym pull request do gałęzi main,
+#   - instaluje zależności przez uv,
+#   - odpala eval na golden dataset w trybie MOCK (LLM_MODE=mock) => zero kosztów API,
+#   - publikuje wyniki jako komentarz w PR,
+#   - bramka SLA (gate) blokuje merge, jeśli progi z config/thresholds.yaml zostaną przekroczone.
+#
+# Szkic docelowy:
+#
+# name: LLM Eval
+# on:
+#   pull_request:
+#     branches: [main]
+# jobs:
+#   eval:
+#     runs-on: ubuntu-latest
+#     env:
+#       LLM_MODE: mock
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: astral-sh/setup-uv@v5
+#       - run: uv sync --extra dev
+#       - run: uv run python -m src.eval.runner
+#       - run: uv run python -m src.eval.gate

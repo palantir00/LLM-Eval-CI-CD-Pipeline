@@ -427,3 +427,38 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# ============================================================
+# Sekcja projektowa: LLM Eval CI/CD Pipeline
+# ============================================================
+
+# PRYWATNY plik pamięci projektu — NIE trafia na publiczne repo.
+CLAUDE.md
+
+# Sekrety i lokalna konfiguracja (klucz API!). NIGDY do repo.
+.env
+.env.local
+
+# Środowisko wirtualne uv
+.venv/
+
+# Cache narzędzi jakości
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+
+# Baza wektorowa ChromaDB (artefakt generowany lokalnie z bazy wiedzy)
+chroma/
+.chroma/
+chromadb/
+*.chroma
+
+# Storage metryk SQLite (artefakt generowany lokalnie)
+*.db
+*.sqlite3
+*.sqlite
+data/*.db
+metrics.db
+
+# Cache modeli sentence-transformers / HuggingFace
+.cache/
