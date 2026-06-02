@@ -1,0 +1,15 @@
+# Model definitions to test. The pipeline can run evaluation against different models
+# and compare results. Full use in STEPS 4 and 6.
+
+# Model used by default when no other is specified.
+default: gpt-4o-mini
+
+models:
+  - name: gpt-4o-mini
+    provider: openai
+    # Pricing in USD per 1M tokens (as of mid-2026 — verify when updating).
+    # We keep pricing in the config because it changes independently of the code (Step 5: cost calc).
+    price_per_1m_input_tokens: 0.15
+    price_per_1m_output_tokens: 0.60
+    max_output_tokens: 1024
+    temperature: 0.0  # determinism = reproducible evaluation

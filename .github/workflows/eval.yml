@@ -1,0 +1,26 @@
+# GitHub Actions workflow — full implementation in STEP 10.
+#
+# Goals (to be implemented):
+#   - runs on every pull request to the main branch,
+#   - installs dependencies via uv,
+#   - runs the evaluation over the golden dataset in MOCK mode (LLM_MODE=mock) => zero API cost,
+#   - posts the results as a PR comment,
+#   - the SLA gate blocks the merge if thresholds from config/thresholds.yaml are exceeded.
+#
+# Target sketch:
+#
+# name: LLM Eval
+# on:
+#   pull_request:
+#     branches: [main]
+# jobs:
+#   eval:
+#     runs-on: ubuntu-latest
+#     env:
+#       LLM_MODE: mock
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: astral-sh/setup-uv@v5
+#       - run: uv sync --extra dev
+#       - run: uv run python -m src.eval.runner
+#       - run: uv run python -m src.eval.gate
