@@ -1,5 +1,5 @@
-"""Retrieval-Augmented Generation: ingest dokumentów do ChromaDB i wyszukiwanie kontekstu.
+"""Retrieval-Augmented Generation: ingest documents into ChromaDB and retrieve context.
 
-Implementacja w KROKU 3. Na razie celowy placeholder, aby struktura projektu
-była kompletna i czytelna od początku.
+Implemented in STEP 3. For now an intentional placeholder so the project structure
+is complete and readable from the start.
 """

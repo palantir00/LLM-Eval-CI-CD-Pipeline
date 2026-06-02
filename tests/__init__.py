@@ -1,1 +1,1 @@
-"""Testy jednostkowe projektu."""
+"""Project unit tests."""

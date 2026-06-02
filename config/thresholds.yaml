@@ -1,20 +1,20 @@
-# Progi SLA dla bramki CI (gate). Pełna logika porównania powstanie w KROKU 7.
-# Jeśli którykolwiek próg zostanie naruszony, pipeline w CI kończy się kodem 1
-# i blokuje merge. Wartości poniżej to rozsądny punkt startowy — doprecyzujemy je
-# wraz z implementacją metryk.
+# SLA thresholds for the CI gate. The full comparison logic is built in STEP 7.
+# If any threshold is violated, the pipeline in CI exits with code 1 and blocks the merge.
+# The values below are a reasonable starting point — we will refine them together with
+# the metrics implementation.
 
-# Maksymalny dopuszczalny odsetek halucynacji (0.05 = 5%). Wymóg z założeń projektu.
+# Maximum allowed hallucination rate (0.05 = 5%). Required by the project assumptions.
 max_hallucination_rate: 0.05
 
-# Minimalna trafność odpowiedzi (answer relevancy), skala 0..1.
+# Minimum answer relevancy, scale 0..1.
 min_answer_relevancy: 0.80
 
-# Minimalna wierność źródłom (faithfulness), skala 0..1.
+# Minimum faithfulness to sources, scale 0..1.
 min_faithfulness: 0.85
 
-# Limity latencji w sekundach (percentyle liczone z całego runu).
+# Latency limits in seconds (percentiles computed over the whole run).
 max_latency_p50_seconds: 2.0
 max_latency_p95_seconds: 5.0
 
-# Maksymalny średni koszt pojedynczego zapytania w USD.
+# Maximum average cost of a single query in USD.
 max_cost_per_query_usd: 0.01

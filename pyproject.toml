@@ -1,74 +1,74 @@
-# pyproject.toml — jedno centralne źródło konfiguracji projektu.
-# Zarządzamy zależnościami przez `uv` (szybki menedżer pakietów, następca pip/venv).
+# pyproject.toml — the single central configuration file for the project.
+# Dependencies are managed with `uv` (a fast, modern package manager; successor to pip/venv).
 
 [project]
 name = "llm-eval-cicd"
 version = "0.1.0"
-description = "Zautomatyzowany pipeline ewaluacyjny dla outputów LLM (CI/CD dla promptów, modeli i RAG)."
+description = "Automated evaluation pipeline for LLM outputs (CI/CD for prompts, models and RAG)."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 
-# --- Zależności produkcyjne (potrzebne do działania pipeline'u) ---
+# --- Production dependencies (needed to run the pipeline) ---
 dependencies = [
-    # Pipeline LLM + RAG
-    "openai>=1.30",                 # oficjalny klient OpenAI API
-    "tiktoken>=0.7",                # liczenie tokenów (do śledzenia kosztów)
-    "chromadb>=0.5",                # lekka, lokalna baza wektorowa (RAG)
-    "sentence-transformers>=3.0",   # lokalne embeddingi (bez kosztów API)
+    # LLM pipeline + RAG
+    "openai>=1.30",                 # official OpenAI API client
+    "tiktoken>=0.7",                # token counting (for cost tracking)
+    "chromadb>=0.5",                # lightweight, local vector store (RAG)
+    "sentence-transformers>=3.0",   # local embeddings (no API cost)
 
-    # Konfiguracja i walidacja danych
-    "pydantic>=2.7",                # walidacja schematu golden dataset
-    "pyyaml>=6.0",                  # wczytywanie config/*.yaml
-    "python-dotenv>=1.0",           # ładowanie zmiennych z pliku .env
+    # Configuration and data validation
+    "pydantic>=2.7",                # golden dataset schema validation
+    "pyyaml>=6.0",                  # loading config/*.yaml
+    "python-dotenv>=1.0",           # loading variables from a .env file
 
-    # Niezawodność wywołań sieciowych
-    "tenacity>=8.3",                # retry z exponential backoff (Krok 4)
+    # Network call reliability
+    "tenacity>=8.3",                # retry with exponential backoff (Step 4)
 
-    # Storage i dashboard
-    "pandas>=2.2",                  # odczyt metryk z SQLite do wykresów
-    "streamlit>=1.35",              # dashboard (Krok 9)
+    # Storage and dashboard
+    "pandas>=2.2",                  # reading metrics from SQLite into charts
+    "streamlit>=1.35",              # dashboard (Step 9)
 
-    # UX lokalnego uruchomienia
-    "tqdm>=4.66",                   # progress bar w runnerze (Krok 6)
+    # Local run UX
+    "tqdm>=4.66",                   # progress bar in the runner (Step 6)
 
-    # UWAGA: framework ewaluacyjny (DeepEval vs Ragas) świadomie dodamy
-    # dopiero w Kroku 5 — razem z pełnym uzasadnieniem wyboru.
+    # NOTE: the evaluation framework (DeepEval vs Ragas) will be added deliberately
+    # only in Step 5 — together with a full justification of the choice.
 ]
 
-# --- Zależności deweloperskie (narzędzia jakości, nie trafiają na produkcję) ---
+# --- Development dependencies (quality tools, not shipped to production) ---
 [project.optional-dependencies]
 dev = [
-    "ruff>=0.4",          # linter + formatter (szybki, zastępuje flake8/black/isort)
-    "mypy>=1.10",         # statyczna analiza typów
-    "pytest>=8.2",        # testy
-    "types-PyYAML>=6.0",  # stuby typów dla PyYAML (potrzebne dla mypy strict)
+    "ruff>=0.4",          # linter + formatter (fast; replaces flake8/black/isort)
+    "mypy>=1.10",         # static type analysis
+    "pytest>=8.2",        # tests
+    "types-PyYAML>=6.0",  # type stubs for PyYAML (needed for mypy strict)
 ]
 
-# --- Konfiguracja uv ---
+# --- uv configuration ---
 [tool.uv]
-# Traktujemy projekt jako APLIKACJĘ, nie bibliotekę do publikacji na PyPI.
-# Brak sekcji [build-system] + package = false => uv NIE próbuje budować pakietu,
-# tylko zarządza wirtualnym środowiskiem. Kod uruchamiamy z katalogu głównego
-# przez `uv run python -m ...`, dzięki czemu importy `from src....` po prostu działają
-# (polecenie `python -m` dodaje bieżący katalog do sys.path).
+# We treat the project as an APPLICATION, not a library to publish on PyPI.
+# No [build-system] + package = false => uv does NOT try to build a package,
+# it only manages the virtual environment. We run the code from the project root
+# via `uv run python -m ...`, so that `from src....` imports just work
+# (the `python -m` command adds the current directory to sys.path).
 package = false
 
-# --- Ruff: linting + formatowanie ---
+# --- Ruff: linting + formatting ---
 [tool.ruff]
 line-length = 100
 target-version = "py311"
 
 [tool.ruff.lint]
-# E,F = błędy podstawowe; I = sortowanie importów; B = pułapki (bugbear);
-# UP = modernizacja składni; N = nazewnictwo PEP8; D = docstringi.
+# E,F = basic errors; I = import sorting; B = common bugs (bugbear);
+# UP = syntax modernization; N = PEP8 naming; D = docstrings.
 select = ["E", "F", "I", "B", "UP", "N", "D"]
-ignore = ["D203", "D213"]  # wyłączamy konfliktujące reguły, by wybrać jeden styl
+ignore = ["D203", "D213"]  # disable conflicting rules so we pick a single style
 
 [tool.ruff.lint.pydocstyle]
-convention = "google"  # styl docstringów Google (wymóg projektu)
+convention = "google"  # Google docstring style (project requirement)
 
-# --- mypy: typy w trybie strict (wymóg projektu) ---
+# --- mypy: types in strict mode (project requirement) ---
 [tool.mypy]
 python_version = "3.11"
 strict = true
@@ -76,6 +76,6 @@ warn_unused_ignores = true
 
 # --- pytest ---
 [tool.pytest.ini_options]
-# Dodaje katalog główny do sys.path, więc testy importują `from src....`
+# Adds the project root to sys.path, so tests can import `from src....`
 pythonpath = ["."]
 testpaths = ["tests"]

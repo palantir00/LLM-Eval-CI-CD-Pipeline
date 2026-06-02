@@ -1,1 +1,1 @@
-"""Warstwa ewaluacji: metryki, runner i bramka SLA dla CI."""
+"""Evaluation layer: metrics, runner and the CI SLA gate."""

@@ -1,4 +1,4 @@
-"""Dashboard Streamlit: metryki w czasie, porównanie runów, wykrywanie regresji, trend kosztów.
+"""Streamlit dashboard: metrics over time, run comparison, regression detection, cost trend.
 
-Implementacja w KROKU 9. Uruchomienie (po zaimplementowaniu): `uv run streamlit run src/dashboard/app.py`.
+Implemented in STEP 9. Run (once implemented): `uv run streamlit run src/dashboard/app.py`.
 """

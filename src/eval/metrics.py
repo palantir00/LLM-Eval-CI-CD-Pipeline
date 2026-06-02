@@ -1,5 +1,5 @@
-"""Metryki ewaluacyjne: hallucination rate, answer relevancy, latency, koszt, faithfulness.
+"""Evaluation metrics: hallucination rate, answer relevancy, latency, cost, faithfulness.
 
-Implementacja w KROKU 5 — każda metryka z wzorem, docstringiem Google
-i sekcją "Jak to wytłumaczyć na rozmowie kwalifikacyjnej".
+Implemented in STEP 5 — each metric with a formula, a Google-style docstring
+and a "How to explain this in a job interview" section.
 """

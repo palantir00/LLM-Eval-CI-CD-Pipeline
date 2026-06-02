@@ -1,70 +1,78 @@
 # LLM Eval CI/CD Pipeline
 
-> Zautomatyzowany pipeline ewaluacyjny, który testuje outputy LLM przy każdej zmianie
-> promptów, modeli lub bazy wiedzy RAG — tak jak testy jednostkowe uruchamiają się przy
-> zmianach w kodzie.
+> An automated evaluation pipeline that tests LLM outputs whenever prompts, models, or the
+> RAG knowledge base change — just like unit tests run on code changes.
 
-<!-- TODO (Krok 11): badge'e CI, coverage, licencja -->
+<!-- TODO (Step 11): CI, coverage, license badges -->
 
-## Spis treści
+## Table of contents
 
 - [Problem](#problem)
-- [Architektura](#architektura) <!-- TODO: diagram mermaid (Krok 11) -->
-- [Mierzone metryki](#mierzone-metryki)
-- [Szybki start](#szybki-start)
-- [Struktura projektu](#struktura-projektu)
-- [Screenshoty](#screenshoty) <!-- TODO: zrzuty dashboardu (Krok 11) -->
-- [Czego się nauczyłam](#czego-się-nauczyłam) <!-- TODO (Krok 11) -->
+- [Architecture](#architecture) <!-- TODO: mermaid diagram (Step 11) -->
+- [Measured metrics](#measured-metrics)
+- [Quick start](#quick-start)
+- [Project structure](#project-structure)
+- [Screenshots](#screenshots) <!-- TODO: dashboard screenshots (Step 11) -->
+- [What I learned](#what-i-learned) <!-- TODO (Step 11) -->
 
 ## Problem
 
-Outputy LLM potrafią cicho się pogorszyć (regresja), gdy zmienimy prompt, podmienimy model
-albo zaktualizujemy bazę wiedzy RAG. Nie widać tego w klasycznych testach jednostkowych.
-Ten projekt traktuje jakość odpowiedzi LLM jak coś, co da się **zmierzyć i bramkować w CI**.
+LLM outputs can silently degrade (regress) when you change a prompt, swap the model, or
+update the RAG knowledge base. Classic unit tests do not catch this. This project treats
+the quality of LLM answers as something you can **measure and gate in CI**.
 
-## Architektura
+The demonstration domain is a **generic digital bank / fintech app** (cards, transfers,
+fees, KYC, security) — deliberately not tied to any specific brand, so the project stays
+universal. The pipeline works the same way for any domain.
 
-<!-- TODO (Krok 11): diagram mermaid -->
-Golden dataset → Pipeline (RAG + LLM) → Metryki → Bramka SLA (gate) → Storage (SQLite) → Dashboard.
+## Architecture
 
-## Mierzone metryki
+<!-- TODO (Step 11): mermaid diagram -->
+Golden dataset → Pipeline (RAG + LLM) → Metrics → SLA gate → Storage (SQLite) → Dashboard.
 
-- **Hallucination rate** — odsetek odpowiedzi z treścią niepopartą źródłami (LLM-as-judge).
-- **Answer relevancy** — czy odpowiedź faktycznie odpowiada na pytanie.
-- **Faithfulness** — wierność odpowiedzi wobec dostarczonego kontekstu.
-- **Latency p50 / p95** — opóźnienie (percentyle, nie średnia).
-- **Koszt / zapytanie** — liczba tokenów × cennik modelu.
+## Measured metrics
 
-## Szybki start
+- **Hallucination rate** — share of answers containing content unsupported by sources (LLM-as-judge).
+- **Answer relevancy** — whether the answer actually addresses the question.
+- **Faithfulness** — how faithful the answer is to the provided context.
+- **Latency p50 / p95** — response time (percentiles, not the mean).
+- **Cost per query** — number of tokens × model pricing.
+
+## Quick start
 
 ```bash
-# 1. Zależności (wymaga zainstalowanego uv: https://docs.astral.sh/uv/)
+# 1. Dependencies (requires uv installed: https://docs.astral.sh/uv/)
 uv sync --extra dev
 
-# 2. Konfiguracja środowiska
-cp .env.example .env   # tryb domyślny "mock" działa bez klucza API
+# 2. Environment configuration
+cp .env.example .env   # the default "mock" mode works without an API key
 
-# (kolejne komendy — seed danych, uruchomienie evalu, dashboard — pojawią się w sekcjach poniżej w miarę budowy projektu)
+# 3. Generate the sample golden dataset
+uv run python -m scripts.seed_golden_dataset
+
+# (more commands will appear in the sections below as the project grows)
 ```
 
-## Struktura projektu
+## Project structure
 
 ```
-config/    # progi SLA (thresholds.yaml) i definicje modeli (models.yaml)
-data/      # golden_dataset.jsonl + dokumenty bazy wiedzy RAG
+config/    # SLA thresholds (thresholds.yaml) and model definitions (models.yaml)
+data/      # golden_dataset.jsonl + RAG knowledge base documents
 src/
-  pipeline/  # RAG, klient LLM, prompty
-  eval/      # metryki, runner, bramka SLA
-  storage/   # zapis metryk w SQLite
-  dashboard/ # dashboard Streamlit
-scripts/   # seed danych, ingest bazy wiedzy
-tests/     # testy pytest
+  golden_dataset.py  # Pydantic schema + JSONL validation
+  paths.py           # central project paths
+  pipeline/          # RAG, LLM client, prompts
+  eval/              # metrics, runner, SLA gate
+  storage/           # metric storage in SQLite
+  dashboard/         # Streamlit dashboard
+scripts/   # data seeding, knowledge base ingest
+tests/     # pytest tests
 ```
 
-## Screenshoty
+## Screenshots
 
-<!-- TODO (Krok 11) -->
+<!-- TODO (Step 11) -->
 
-## Czego się nauczyłam
+## What I learned
 
-<!-- TODO (Krok 11) -->
+<!-- TODO (Step 11) -->

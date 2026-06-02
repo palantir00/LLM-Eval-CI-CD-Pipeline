@@ -1,1 +1,1 @@
-"""Trwały zapis historii metryk i runów (SQLite)."""
+"""Persistent storage of metric history and runs (SQLite)."""

@@ -1,1 +1,1 @@
-"""Kod źródłowy pipeline'u ewaluacyjnego LLM."""
+"""Source code of the LLM evaluation pipeline."""

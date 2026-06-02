@@ -1,4 +1,4 @@
-"""Storage metryk w SQLite: schemat runów i metryk + proste wersjonowanie schematu.
+"""Metric storage in SQLite: schema for runs and metrics + simple schema versioning.
 
-Implementacja w KROKU 8.
+Implemented in STEP 8.
 """

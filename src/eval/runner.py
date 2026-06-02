@@ -1,4 +1,4 @@
-"""Orkiestracja pełnego runu evalu na golden dataset (z agregacją wyników).
+"""Orchestrates a full evaluation run over the golden dataset (with result aggregation).
 
-Implementacja w KROKU 6 (równoległe wykonanie tam, gdzie bezpieczne + progress bar).
+Implemented in STEP 6 (parallel execution where safe + progress bar).
 """

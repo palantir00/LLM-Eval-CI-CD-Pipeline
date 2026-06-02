@@ -1,4 +1,4 @@
-"""Abstrakcja klienta LLM: wspólny interfejs + implementacje OpenAI i mock.
+"""LLM client abstraction: a common interface plus OpenAI and mock implementations.
 
-Implementacja w KROKU 4 (interfejs, retry z backoff, liczenie tokenów, tryb mock).
+Implemented in STEP 4 (interface, retry with backoff, token counting, mock mode).
 """

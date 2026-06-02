@@ -1,13 +1,13 @@
-# Workflow GitHub Actions — pełna implementacja w KROKU 10.
+# GitHub Actions workflow — full implementation in STEP 10.
 #
-# Założenia (do realizacji):
-#   - uruchamia się przy każdym pull request do gałęzi main,
-#   - instaluje zależności przez uv,
-#   - odpala eval na golden dataset w trybie MOCK (LLM_MODE=mock) => zero kosztów API,
-#   - publikuje wyniki jako komentarz w PR,
-#   - bramka SLA (gate) blokuje merge, jeśli progi z config/thresholds.yaml zostaną przekroczone.
+# Goals (to be implemented):
+#   - runs on every pull request to the main branch,
+#   - installs dependencies via uv,
+#   - runs the evaluation over the golden dataset in MOCK mode (LLM_MODE=mock) => zero API cost,
+#   - posts the results as a PR comment,
+#   - the SLA gate blocks the merge if thresholds from config/thresholds.yaml are exceeded.
 #
-# Szkic docelowy:
+# Target sketch:
 #
 # name: LLM Eval
 # on:

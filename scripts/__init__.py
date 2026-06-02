@@ -1,1 +1,1 @@
-"""Skrypty pomocnicze (seed danych, ingest bazy wiedzy). Uruchamiane przez `python -m scripts.<nazwa>`."""
+"""Helper scripts (data seeding, knowledge base ingest). Run via `python -m scripts.<name>`."""

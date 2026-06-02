@@ -1,4 +1,4 @@
-"""Ingest przykładowych dokumentów lotniczych do bazy wektorowej ChromaDB.
+"""Ingest sample banking documents into the ChromaDB vector store.
 
-Implementacja w KROKU 3. Uruchomienie: `uv run python -m scripts.load_knowledge_base`.
+Implemented in STEP 3. Run: `uv run python -m scripts.load_knowledge_base`.
 """

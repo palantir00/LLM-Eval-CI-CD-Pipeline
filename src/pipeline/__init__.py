@@ -1,1 +1,1 @@
-"""Pipeline produkcyjny: retrieval RAG, klient LLM i szablony promptów."""
+"""Production pipeline: RAG retrieval, LLM client and prompt templates."""

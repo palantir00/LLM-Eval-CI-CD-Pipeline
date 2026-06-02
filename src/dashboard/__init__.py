@@ -1,1 +1,1 @@
-"""Dashboard wizualizujący metryki w czasie (Streamlit)."""
+"""Dashboard visualizing metrics over time (Streamlit)."""

@@ -1,4 +1,4 @@
-"""Bramka SLA dla CI: porównuje metryki z progami i zwraca kod wyjścia 1 przy naruszeniu.
+"""CI SLA gate: compares metrics against thresholds and exits with code 1 on violation.
 
-Implementacja w KROKU 7 (czyta config/thresholds.yaml, jasne komunikaty o przekroczeniu).
+Implemented in STEP 7 (reads config/thresholds.yaml, clear messages on which threshold failed).
 """

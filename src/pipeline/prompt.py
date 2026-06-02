@@ -1,4 +1,4 @@
-"""Szablony promptów (system + user) dla pipeline'u RAG.
+"""Prompt templates (system + user) for the RAG pipeline.
 
-Implementacja w KROKACH 4-5.
+Implemented in STEPS 4-5.
 """
