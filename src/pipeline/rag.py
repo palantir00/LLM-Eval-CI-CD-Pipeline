@@ -16,6 +16,7 @@ from pathlib import Path
 import chromadb
 from chromadb.api import ClientAPI
 from chromadb.api.models.Collection import Collection
+from chromadb.api.types import Metadata
 from chromadb.config import Settings
 from chromadb.utils import embedding_functions
 
@@ -121,9 +122,12 @@ class KnowledgeBase:
 
     def _get_or_create_collection(self) -> Collection:
         """Return the collection, creating it (with cosine distance) if it does not exist."""
+        # ChromaDB's bundled SentenceTransformerEmbeddingFunction does not perfectly match its
+        # own EmbeddingFunction type hint (a known stub variance issue); at runtime this is the
+        # intended, supported way to pass it, so we silence the type checker on that argument.
         return self._client.get_or_create_collection(
             name=COLLECTION_NAME,
-            embedding_function=self._embedding_function,
+            embedding_function=self._embedding_function,  # type: ignore[arg-type]
             # Cosine distance is the standard choice for sentence-embedding similarity.
             metadata={"hnsw:space": "cosine"},
         )
@@ -159,7 +163,8 @@ class KnowledgeBase:
         # ChromaDB's add() takes parallel lists: documents, ids and metadata.
         documents: list[str] = []
         ids: list[str] = []
-        metadatas: list[dict[str, str | int]] = []
+        # Metadata is ChromaDB's own type alias for a chunk's metadata mapping.
+        metadatas: list[Metadata] = []
 
         for md_file in md_files:
             text = md_file.read_text(encoding="utf-8")
