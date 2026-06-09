@@ -14,7 +14,7 @@ from dataclasses import dataclass
 
 from src.config import Thresholds, load_thresholds
 from src.eval.metrics import RunMetrics
-from src.eval.runner import EvalRunner
+from src.storage.db import MetricsDatabase, RunRecord
 
 logger = logging.getLogger(__name__)
 
@@ -86,35 +86,55 @@ def check_thresholds(metrics: RunMetrics, thresholds: Thresholds) -> list[Violat
     return violations
 
 
-def evaluate_and_gate() -> int:
-    """Run a full evaluation, check the SLA, and return a process exit code.
+def _record_to_metrics(record: RunRecord) -> RunMetrics:
+    """Convert a stored run record back into a RunMetrics for threshold checking."""
+    return RunMetrics(
+        num_items=record.num_items,
+        hallucination_rate=record.hallucination_rate,
+        mean_answer_relevancy=record.mean_answer_relevancy,
+        mean_faithfulness=record.mean_faithfulness,
+        latency_p50_seconds=record.latency_p50_seconds,
+        latency_p95_seconds=record.latency_p95_seconds,
+        mean_cost_usd=record.mean_cost_usd,
+    )
 
-    NOTE: for now the gate runs the evaluation itself, so it is self-contained. Once storage
-    exists (Step 8), the runner will save metrics and the gate will read the latest run instead
-    of re-evaluating.
+
+def gate_latest(database: MetricsDatabase | None = None) -> int:
+    """Read the most recent run from storage, check the SLA, and return a process exit code.
+
+    The runner saves each evaluation to the database; the gate simply reads the latest one. This
+    keeps the gate cheap (no second evaluation) and means CI checks exactly what was recorded.
+
+    Args:
+        database: Metrics database to read from (defaults to the standard one).
 
     Returns:
-        0 if all thresholds are satisfied, 1 if any threshold is violated.
+        0 if all thresholds are satisfied, 1 if any threshold is violated (or no run exists).
     """
-    thresholds = load_thresholds()
-    result = EvalRunner.build_default().run()
-    metrics = result.metrics
+    database = database or MetricsDatabase()
+    record = database.get_latest_run()
+    if record is None:
+        logger.error("No evaluation run found. Run `python -m src.eval.runner` first.")
+        return 1
 
-    violations = check_thresholds(metrics, thresholds)
+    violations = check_thresholds(_record_to_metrics(record), load_thresholds())
     if violations:
-        logger.error("SLA gate FAILED — %d threshold(s) violated:", len(violations))
+        logger.error(
+            "SLA gate FAILED for run #%d — %d threshold(s) violated:", record.id, len(violations)
+        )
         for violation in violations:
             logger.error("  - %s", violation.message())
         return 1
 
-    logger.info("SLA gate PASSED — all %d items met every threshold.", metrics.num_items)
+    logger.info("SLA gate PASSED for run #%d — all %d items met every threshold.",
+                record.id, record.num_items)
     return 0
 
 
 def main() -> None:
     """Entry point: exit with code 0 (pass) or 1 (fail) so CI can block the merge."""
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-    sys.exit(evaluate_and_gate())
+    sys.exit(gate_latest())
 
 
 if __name__ == "__main__":

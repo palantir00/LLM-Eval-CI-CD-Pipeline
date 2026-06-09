@@ -21,6 +21,9 @@ KNOWLEDGE_BASE_DIR = DATA_DIR / "knowledge_base"
 # ChromaDB vector store (local, generated artifact — git-ignored).
 CHROMA_DIR = PROJECT_ROOT / "chroma"
 
+# SQLite database with the metrics history (local, generated artifact — git-ignored).
+METRICS_DB_PATH = DATA_DIR / "metrics.db"
+
 # Configuration directory (SLA thresholds, model definitions)
 CONFIG_DIR = PROJECT_ROOT / "config"
 THRESHOLDS_PATH = CONFIG_DIR / "thresholds.yaml"
