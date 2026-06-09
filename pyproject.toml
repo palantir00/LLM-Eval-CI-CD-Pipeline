@@ -77,7 +77,7 @@ warn_unused_ignores = true
 # Some third-party libraries ship no type information. We tell mypy to not complain about
 # missing stubs for them, so strict mode still applies fully to OUR code.
 [[tool.mypy.overrides]]
-module = ["chromadb.*", "sentence_transformers.*", "tiktoken.*"]
+module = ["chromadb.*", "sentence_transformers.*", "tiktoken.*", "tqdm.*"]
 ignore_missing_imports = true
 
 # --- pytest ---
