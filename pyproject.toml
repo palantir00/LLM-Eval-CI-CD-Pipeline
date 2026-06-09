@@ -28,6 +28,7 @@ dependencies = [
     # Storage and dashboard
     "pandas>=2.2",                  # reading metrics from SQLite into charts
     "streamlit>=1.35",              # dashboard (Step 9)
+    "altair>=5.0",                  # declarative charts with threshold lines (Step 9)
 
     # Local run UX
     "tqdm>=4.66",                   # progress bar in the runner (Step 6)
@@ -77,8 +78,17 @@ warn_unused_ignores = true
 # Some third-party libraries ship no type information. We tell mypy to not complain about
 # missing stubs for them, so strict mode still applies fully to OUR code.
 [[tool.mypy.overrides]]
-module = ["chromadb.*", "sentence_transformers.*", "tiktoken.*", "tqdm.*"]
+module = [
+    "chromadb.*", "sentence_transformers.*", "tiktoken.*", "tqdm.*",
+    "altair.*", "pandas.*", "streamlit.*",
+]
 ignore_missing_imports = true
+
+# The dashboard is presentation glue over untyped UI libraries (Streamlit/Altair/pandas).
+# We keep the core code strict but relax "return Any" noise here so it stays readable.
+[[tool.mypy.overrides]]
+module = ["src.dashboard.*"]
+warn_return_any = false
 
 # --- pytest ---
 [tool.pytest.ini_options]
