@@ -86,7 +86,7 @@ def check_thresholds(metrics: RunMetrics, thresholds: Thresholds) -> list[Violat
     return violations
 
 
-def _record_to_metrics(record: RunRecord) -> RunMetrics:
+def record_to_metrics(record: RunRecord) -> RunMetrics:
     """Convert a stored run record back into a RunMetrics for threshold checking."""
     return RunMetrics(
         num_items=record.num_items,
@@ -117,7 +117,7 @@ def gate_latest(database: MetricsDatabase | None = None) -> int:
         logger.error("No evaluation run found. Run `python -m src.eval.runner` first.")
         return 1
 
-    violations = check_thresholds(_record_to_metrics(record), load_thresholds())
+    violations = check_thresholds(record_to_metrics(record), load_thresholds())
     if violations:
         logger.error(
             "SLA gate FAILED for run #%d — %d threshold(s) violated:", record.id, len(violations)

@@ -460,5 +460,8 @@ chromadb/
 data/*.db
 metrics.db
 
+# Generated evaluation report (PR comment body, created in CI)
+eval_report.md
+
 # Cache modeli sentence-transformers / HuggingFace
 .cache/
