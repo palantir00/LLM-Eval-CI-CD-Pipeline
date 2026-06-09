@@ -17,11 +17,15 @@ are used — only the wall-clock time changes.
 """
 
 import logging
+import os
+import subprocess
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 
 from tqdm import tqdm
 
+from src.config import get_model_config, load_thresholds
+from src.eval.gate import check_thresholds
 from src.eval.metrics import (
     HallucinationVerdict,
     RunMetrics,
@@ -32,10 +36,11 @@ from src.eval.metrics import (
     judge_hallucination,
 )
 from src.golden_dataset import GoldenItem, load_golden_dataset
-from src.paths import GOLDEN_DATASET_PATH
+from src.paths import GOLDEN_DATASET_PATH, PROJECT_ROOT
 from src.pipeline.llm_client import LLMClient, build_llm_client
 from src.pipeline.prompt import build_answer_prompt
 from src.pipeline.rag import KnowledgeBase
+from src.storage.db import MetricsDatabase
 
 logger = logging.getLogger(__name__)
 
@@ -191,21 +196,50 @@ class EvalRunner:
         return RunResult(metrics=metrics, items=item_results)
 
 
+def _current_git_commit() -> str | None:
+    """Return the current short git commit hash, or None if it cannot be determined."""
+    try:
+        completed = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        return completed.stdout.strip()
+    except (subprocess.SubprocessError, OSError):
+        return None
+
+
 def main() -> None:
-    """Run a full evaluation from the command line and log the aggregated metrics."""
+    """Run a full evaluation, save it to the database, and log the aggregated metrics."""
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
     runner = EvalRunner.build_default()
     result = runner.run()
     metrics = result.metrics
 
-    logger.info("--- Evaluation results (%d items) ---", metrics.num_items)
+    # Compute the gate status now so it is stored alongside the run (used by the dashboard).
+    gate_passed = len(check_thresholds(metrics, load_thresholds())) == 0
+
+    database = MetricsDatabase()
+    run_id = database.save_run(
+        metrics,
+        result.items,
+        llm_mode=os.getenv("LLM_MODE", "mock"),
+        model_name=get_model_config(os.getenv("OPENAI_MODEL") or None).name,
+        gate_passed=gate_passed,
+        git_commit=_current_git_commit(),
+    )
+
+    logger.info("--- Evaluation results (run #%d, %d items) ---", run_id, metrics.num_items)
     logger.info("Hallucination rate : %.1f%%", metrics.hallucination_rate * 100)
     logger.info("Answer relevancy   : %.3f", metrics.mean_answer_relevancy)
     logger.info("Faithfulness       : %.3f", metrics.mean_faithfulness)
     logger.info("Latency p50 / p95  : %.3fs / %.3fs",
                 metrics.latency_p50_seconds, metrics.latency_p95_seconds)
     logger.info("Mean cost / query  : $%.6f", metrics.mean_cost_usd)
+    logger.info("SLA gate           : %s", "PASSED" if gate_passed else "FAILED")
 
 
 if __name__ == "__main__":
