@@ -9,9 +9,9 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
-from src.paths import MODELS_PATH
+from src.paths import MODELS_PATH, THRESHOLDS_PATH
 
 
 class ModelConfig(BaseModel):
@@ -78,3 +78,40 @@ def get_model_config(name: str | None = None, path: Path = MODELS_PATH) -> Model
 
     # ** unpacks the dict into keyword arguments; Pydantic validates the fields.
     return ModelConfig(**models_by_name[chosen_name])
+
+
+class Thresholds(BaseModel):
+    """SLA thresholds the CI gate checks a run against.
+
+    "max_*" fields are upper bounds (the metric must stay at or below them); "min_*" fields are
+    lower bounds (the metric must stay at or above them).
+    """
+
+    # extra="forbid" => a typo'd key in thresholds.yaml fails loudly instead of being ignored.
+    model_config = ConfigDict(extra="forbid")
+
+    max_hallucination_rate: float = Field(ge=0, le=1)
+    min_answer_relevancy: float = Field(ge=0, le=1)
+    min_faithfulness: float = Field(ge=0, le=1)
+    max_latency_p50_seconds: float = Field(gt=0)
+    max_latency_p95_seconds: float = Field(gt=0)
+    max_cost_per_query_usd: float = Field(ge=0)
+
+
+def load_thresholds(path: Path = THRESHOLDS_PATH) -> Thresholds:
+    """Load and validate the SLA thresholds from the thresholds YAML file.
+
+    Args:
+        path: Path to the thresholds YAML file.
+
+    Returns:
+        The validated Thresholds.
+
+    Raises:
+        FileNotFoundError: When the config file does not exist.
+    """
+    if not path.exists():
+        raise FileNotFoundError(f"Thresholds config not found: {path}")
+
+    raw: dict[str, Any] = yaml.safe_load(path.read_text(encoding="utf-8"))
+    return Thresholds(**raw)
