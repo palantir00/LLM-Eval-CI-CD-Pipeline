@@ -1,26 +1,57 @@
-# GitHub Actions workflow — full implementation in STEP 10.
+# LLM evaluation pipeline, run on every pull request.
 #
-# Goals (to be implemented):
-#   - runs on every pull request to the main branch,
-#   - installs dependencies via uv,
-#   - runs the evaluation over the golden dataset in MOCK mode (LLM_MODE=mock) => zero API cost,
-#   - posts the results as a PR comment,
-#   - the SLA gate blocks the merge if thresholds from config/thresholds.yaml are exceeded.
-#
-# Target sketch:
-#
-# name: LLM Eval
-# on:
-#   pull_request:
-#     branches: [main]
-# jobs:
-#   eval:
-#     runs-on: ubuntu-latest
-#     env:
-#       LLM_MODE: mock
-#     steps:
-#       - uses: actions/checkout@v4
-#       - uses: astral-sh/setup-uv@v5
-#       - run: uv sync --extra dev
-#       - run: uv run python -m src.eval.runner
-#       - run: uv run python -m src.eval.gate
+# DESIGN: the evaluation runs in MOCK mode (LLM_MODE: mock), so it never calls a paid API.
+# Every push is evaluated for free and deterministically. The mock validates that the whole
+# pipeline runs and that the SLA gate logic works; real-quality evaluation against the live
+# model is run separately (locally, or in a job with a secret key) when needed.
+
+name: LLM Eval
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write   # required so the workflow can post a comment on the PR
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    env:
+      LLM_MODE: mock       # offline, deterministic, zero API cost
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true   # cache uv downloads between runs
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+
+      - name: Build the RAG knowledge base
+        # The Chroma vector store is git-ignored, so CI rebuilds it from the documents.
+        run: uv run python -m scripts.load_knowledge_base
+
+      - name: Run the evaluation (mock)
+        # Saves the run (metrics + per-item details) to the SQLite database.
+        run: uv run python -m src.eval.runner
+
+      - name: Generate the Markdown report
+        if: always()
+        run: uv run python -m src.eval.report
+
+      - name: Post results as a PR comment
+        if: always()
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          # A "sticky" comment is updated in place on re-runs, instead of spamming new comments.
+          path: eval_report.md
+
+      - name: SLA gate (blocks the merge if a threshold is violated)
+        # Reads the latest run from the database and exits 1 on any violation, which fails the
+        # job. If this check is marked "required" in branch protection, a failure blocks merge.
+        run: uv run python -m src.eval.gate
