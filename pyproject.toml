@@ -45,6 +45,12 @@ dev = [
     "pytest>=8.2",        # tests
     "types-PyYAML>=6.0",  # type stubs for PyYAML (needed for mypy strict)
 ]
+# Optional "hybrid" extra: the industry-standard DeepEval library. Its metrics use an LLM judge,
+# so this requires an OpenAI API key and is NOT part of the free CI path. Install with:
+#   uv sync --extra deepeval
+deepeval = [
+    "deepeval>=1.0",
+]
 
 # --- uv configuration ---
 [tool.uv]
@@ -69,6 +75,10 @@ ignore = ["D203", "D213"]  # disable conflicting rules so we pick a single style
 [tool.ruff.lint.pydocstyle]
 convention = "google"  # Google docstring style (project requirement)
 
+[tool.ruff.lint.per-file-ignores]
+# Test functions are self-documenting via their names, so we don't require docstrings there.
+"tests/**" = ["D"]
+
 # --- mypy: types in strict mode (project requirement) ---
 [tool.mypy]
 python_version = "3.11"
@@ -80,7 +90,7 @@ warn_unused_ignores = true
 [[tool.mypy.overrides]]
 module = [
     "chromadb.*", "sentence_transformers.*", "tiktoken.*", "tqdm.*",
-    "altair.*", "pandas.*", "streamlit.*",
+    "altair.*", "pandas.*", "streamlit.*", "deepeval.*",
 ]
 ignore_missing_imports = true
 
