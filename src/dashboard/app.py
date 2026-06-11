@@ -10,14 +10,24 @@ Shows, for the runs stored in SQLite:
 Run it with:  uv run streamlit run src/dashboard/app.py
 """
 
+import sys
 from dataclasses import asdict, dataclass
+from pathlib import Path
 
 import altair as alt
 import pandas as pd
 import streamlit as st
 
-from src.config import Thresholds, load_thresholds
-from src.storage.db import MetricsDatabase
+# `streamlit run` puts THIS file's folder on sys.path, not the project root, so `import src`
+# would fail with ModuleNotFoundError. We add the project root ourselves before importing it
+# (parents[2]: app.py -> dashboard -> src -> project root). Other entry points use `python -m`,
+# which already puts the project root on the path, so they don't need this.
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
+
+from src.config import Thresholds, load_thresholds  # noqa: E402
+from src.storage.db import MetricsDatabase  # noqa: E402
 
 # A red-ish accent used for threshold lines and regressions.
 THRESHOLD_COLOR = "#e45756"
@@ -144,7 +154,7 @@ def render_latest_summary(frame: pd.DataFrame, specs: list[MetricSpec]) -> None:
 def render_regressions(frame: pd.DataFrame, specs: list[MetricSpec]) -> None:
     """Highlight any metric that regressed compared with the previous run."""
     if len(frame) < 2:
-        st.info("Only one run so far — run the evaluation again to see trends and regressions.")
+        st.info("Only one run so far. Run the evaluation again to see trends and regressions.")
         return
 
     latest = frame.iloc[-1]
@@ -156,7 +166,7 @@ def render_regressions(frame: pd.DataFrame, specs: list[MetricSpec]) -> None:
     ]
 
     if not regressions:
-        st.success("No regressions vs the previous run — every metric held or improved.")
+        st.success("No regressions vs the previous run: every metric held or improved.")
         return
 
     lines = []
@@ -173,7 +183,7 @@ def render_trend_charts(frame: pd.DataFrame, specs: list[MetricSpec]) -> None:
         columns = st.columns(2)
         for column, spec in zip(columns, specs[index : index + 2], strict=False):
             with column:
-                st.caption(f"{spec.label} — dashed line is the SLA threshold")
+                st.caption(f"{spec.label} (dashed line = SLA threshold)")
                 st.altair_chart(metric_chart(frame, spec), use_container_width=True)
 
 
