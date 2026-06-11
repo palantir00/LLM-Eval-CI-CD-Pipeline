@@ -1,6 +1,6 @@
 # LLM Eval CI/CD Pipeline
 
-> Automated quality gate for LLM outputs — like unit tests, but for a RAG assistant.
+> Automated quality gate for LLM outputs: like unit tests, but for a RAG assistant.
 > Every pull request re-evaluates the pipeline and **blocks the merge if quality drops**.
 
 ![Python](https://img.shields.io/badge/python-3.11+-blue)
@@ -29,12 +29,12 @@
 ## Why this project
 
 LLM outputs degrade silently. Change a prompt, swap the model, or update the RAG knowledge base,
-and the assistant can start hallucinating, slowing down, or getting more expensive — and classic
+and the assistant can start hallucinating, slowing down, or getting more expensive, and classic
 unit tests will not notice. This project treats answer quality as something you can **measure and
 gate in CI**.
 
 The demonstration domain is a **generic digital bank / fintech assistant** (cards, transfers,
-fees, KYC, security) — deliberately not tied to any brand, so the pipeline stays universal.
+fees, KYC, security), deliberately not tied to any brand, so the pipeline stays universal.
 
 ## Architecture
 
@@ -79,7 +79,7 @@ uv run python -m src.eval.gate                  # SLA gate: exit 1 if a threshol
 uv run streamlit run src/dashboard/app.py       # open the metrics dashboard
 ```
 
-By default everything runs in **mock mode** — offline, deterministic, and free. To evaluate
+By default everything runs in **mock mode**: offline, deterministic, and free. To evaluate
 against the real model, set `LLM_MODE=openai` and `OPENAI_API_KEY` in `.env`.
 
 ## How CI works
@@ -88,7 +88,7 @@ On every pull request, [.github/workflows/eval.yml](.github/workflows/eval.yml):
 
 1. installs dependencies with `uv`,
 2. rebuilds the RAG knowledge base,
-3. runs the evaluation in **mock mode** — so CI is **free and deterministic** (no paid API calls,
+3. runs the evaluation in **mock mode**, so CI is **free and deterministic** (no paid API calls,
    no flaky pass/fail from model randomness),
 4. posts the results as a **sticky comment on the PR** (a metrics table with pass/fail per
    threshold),
@@ -96,7 +96,7 @@ On every pull request, [.github/workflows/eval.yml](.github/workflows/eval.yml):
    branch protection, a failure **blocks the merge**.
 
 Real-quality evaluation against the live model is run separately (locally, or in a job with a
-secret key) when needed — keeping the per-PR feedback loop fast and free.
+secret key) when needed, keeping the per-PR feedback loop fast and free.
 
 ## Project structure
 
@@ -151,8 +151,8 @@ uv run python -m src.eval.deepeval_metrics
 - **Percentiles over averages.** A mean latency hides the slow tail; p95 is what users actually
   feel, which is why SLAs are written as percentiles.
 - **A threshold must match its metric's scale.** Embedding-based scores rarely exceed ~0.7, so I
-  calibrated the gate against a real baseline instead of guessing — otherwise the gate raises
-  false alarms on a healthy pipeline.
+  calibrated the gate against a real baseline instead of guessing, because otherwise the gate
+  raises false alarms on a healthy pipeline.
 - **Pick the right tool for the scale.** SQLite (one file, no server) is plenty for a single-writer
   metrics history; Postgres would be over-engineering here.
 - **Free, deterministic CI.** Running the evaluation on a mock keeps per-PR feedback fast and free,
